@@ -4,7 +4,9 @@
     // Namespaces.
     using global::Umbraco.Web;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Assists with caching operations.
+    /// </summary>
     internal sealed class CacheHelper : ICacheHelper
     {
         #region Private Properties
@@ -25,7 +27,14 @@
 
         #region Public Properties
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns the keys to be used when caching, depending on if the site is currently
+        /// in preview mode or not.
+        /// </summary>
+        /// <remarks>
+        /// This allows for multiple caches to be used (one for live, one for preview mode,
+        /// and one for the back office).
+        /// </remarks>
         public string[] PreviewCacheKeys
         {
             get
