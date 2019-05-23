@@ -24,7 +24,7 @@
     /// remain in memory. By using weak references that are periodically pruned, we can
     /// avoid that buildup of memory.
     /// </remarks>
-    public class UmbracoCachingComponent : IComponent
+    internal sealed class UmbracoCachingComponent : IComponent
     {
 
         #region Private Properties
