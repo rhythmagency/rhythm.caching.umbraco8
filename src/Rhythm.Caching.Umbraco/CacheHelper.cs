@@ -15,7 +15,6 @@
 
         #endregion
 
-
         #region Constructors
 
         public CacheHelper(IUmbracoContextFactory umbracoContextFactory)
@@ -65,5 +64,7 @@
         }
 
         #endregion
+
     }
+
 }

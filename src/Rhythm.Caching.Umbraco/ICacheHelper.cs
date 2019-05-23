@@ -5,6 +5,9 @@
     /// </summary>
     public interface ICacheHelper
     {
+
+        #region Public Properties
+
         /// <summary>
         /// Returns the keys to be used when caching, depending on if the site is currently
         /// in preview mode or not.
@@ -14,5 +17,9 @@
         /// and one for the back office).
         /// </remarks>
         string[] PreviewCacheKeys { get; }
+
+        #endregion
+
     }
+
 }

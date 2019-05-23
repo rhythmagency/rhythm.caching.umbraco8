@@ -1,5 +1,6 @@
 ﻿namespace Rhythm.Caching.Umbraco.Components
 {
+
     // Namespaces.
     using Core.Invalidators;
     using global::Umbraco.Core.Cache;
@@ -7,12 +8,12 @@
     using global::Umbraco.Core.Events;
     using global::Umbraco.Core.Models;
     using global::Umbraco.Core.Services;
-    using global::Umbraco.Core.Services.Implement;
     using global::Umbraco.Core.Sync;
     using global::Umbraco.Web.Cache;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UmbracoContentService = global::Umbraco.Core.Services.Implement.ContentService;
 
     /// <summary>
     /// Handles application events used by caching.
@@ -27,7 +28,10 @@
     {
 
         #region Private Properties
-        private readonly IContentService _contentService;
+        /// <summary>
+        /// An insta
+        /// </summary>
+        private IContentService ContentService { get; set; }
 
         /// <summary>
         /// Lock object to prevent cross-thread issues.
@@ -65,6 +69,28 @@
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Initializes the component.
+        /// </summary>
+        public void Initialize()
+        {
+            // Listen for content change events.
+            UmbracoContentService.Moving += ContentService_Moving;
+            UmbracoContentService.Moved += ContentService_Moved;
+            UmbracoContentService.Published += ContentService_Published;
+            UmbracoContentService.Unpublished += ContentService_UnPublished;
+            UmbracoContentService.Deleted += ContentService_Deleted;
+
+            ContentCacheRefresher.CacheUpdated += ContentCacheRefresher_CacheUpdated;
+        }
+
+        /// <summary>
+        /// Terminates the component.
+        /// </summary>
+        public void Terminate()
+        {
+        }
 
         /// <summary>
         /// Registers a cache by key invalidator so that it can be notified to invalidate any content
@@ -141,7 +167,7 @@
         #region Constructors
         public UmbracoCachingComponent(IContentService contentService)
         {
-            _contentService = contentService;
+            ContentService = contentService;
             KeyByParentInvalidatorsLock = new object();
             KeyByParentInvalidators = new List<WeakReference<ICacheByKeyInvalidator>>();
             KeyByPageInvalidatorsLock = new object();
@@ -151,7 +177,6 @@
         }
 
         #endregion
-
 
         #region Event Handlers
         /// <summary>
@@ -166,7 +191,7 @@
                 var id = e.MessageObject as int?;
                 if (id.HasValue)
                 {
-                    var node = _contentService.GetById(id.Value);
+                    var node = ContentService.GetById(id.Value);
                     if (node != null)
                     {
                         HandleChangedContent(new[] { node });
@@ -396,24 +421,6 @@
         }
 
         #endregion
-
-        /// <inheritdoc />
-        public void Initialize()
-        {
-            // Listen for content change events.
-            ContentService.Moving += ContentService_Moving;
-            ContentService.Moved += ContentService_Moved;
-            ContentService.Published += ContentService_Published;
-            ContentService.Unpublished += ContentService_UnPublished;
-            ContentService.Deleted += ContentService_Deleted;
-
-            ContentCacheRefresher.CacheUpdated += ContentCacheRefresher_CacheUpdated;
-        }
-
-        /// <inheritdoc />
-        public void Terminate()
-        {
-        }
     }
 
 }

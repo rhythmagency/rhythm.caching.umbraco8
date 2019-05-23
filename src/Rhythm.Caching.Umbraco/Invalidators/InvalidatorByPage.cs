@@ -1,5 +1,6 @@
 ﻿namespace Rhythm.Caching.Umbraco.Invalidators
 {
+
     // Namespaces.
     using Components;
     using Core.Caches;

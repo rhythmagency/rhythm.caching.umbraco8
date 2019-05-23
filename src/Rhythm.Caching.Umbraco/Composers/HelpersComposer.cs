@@ -1,5 +1,6 @@
 ﻿namespace Rhythm.Caching.Umbraco.Composers
 {
+
     // Namespaces.
     using global::Umbraco.Core;
     using global::Umbraco.Core.Composing;
@@ -10,10 +11,16 @@
     [RuntimeLevel(MinLevel = RuntimeLevel.Run)]
     public sealed class HelpersComposer : IUserComposer
     {
-        /// <inheritdoc />
+        #region Public Methods
+
+        /// <summary>
+        /// Compose.
+        /// </summary>
         public void Compose(Composition composition)
         {
             composition.Register<ICacheHelper, CacheHelper>();
         }
+
+        #endregion
     }
 }
