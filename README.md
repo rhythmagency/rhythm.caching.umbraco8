@@ -1,17 +1,19 @@
 # Introduction
 
 Builds upon [Rhythm.Caching.Core](https://github.com/rhythmagency/rhythm.caching.core) with tools to invalidate caches
-based on events in Umbraco.
+based on events in Umbraco v8.
 
 Refer to the [generated documentation](docs/generated.md) for more details.
 
 # Installation
 
-Install with NuGet. Search for "Rhythm.Caching.Umbraco".
+Install with NuGet. Search for "Rhythm.Caching.Umbraco8".
 
 # Overview
 
-## CacheHelper
+## ICacheHelper
+
+This must injected via the constructor or pulled from the built-in Umbraco DI container.
 
 * **PreviewCacheKeys** The cache keys you can use to separate the caches for live and preview content.
 
