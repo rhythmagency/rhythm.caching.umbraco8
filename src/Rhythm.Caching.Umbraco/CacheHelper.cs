@@ -16,7 +16,10 @@
         #endregion
 
         #region Constructors
-
+        /// <summary>
+        /// Primary constructor.
+        /// </summary>
+        /// <param name="umbracoContextFactory">Used for accessing the current UmbracoContext.</param>
         public CacheHelper(IUmbracoContextFactory umbracoContextFactory)
         {
             UmbracoContextFactory = umbracoContextFactory;
