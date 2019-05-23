@@ -10,6 +10,7 @@
     [RuntimeLevel(MinLevel = RuntimeLevel.Run)]
     public sealed class HelpersComposer : IUserComposer
     {
+        /// <inheritdoc />
         public void Compose(Composition composition)
         {
             composition.Register<ICacheHelper, CacheHelper>();

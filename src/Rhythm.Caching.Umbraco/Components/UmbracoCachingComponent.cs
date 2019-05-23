@@ -397,6 +397,7 @@
 
         #endregion
 
+        /// <inheritdoc />
         public void Initialize()
         {
             // Listen for content change events.
@@ -409,6 +410,7 @@
             ContentCacheRefresher.CacheUpdated += ContentCacheRefresher_CacheUpdated;
         }
 
+        /// <inheritdoc />
         public void Terminate()
         {
         }
