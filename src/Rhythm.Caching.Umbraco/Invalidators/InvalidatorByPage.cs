@@ -2,9 +2,9 @@
 {
 
     // Namespaces.
+    using Components;
     using Core.Caches;
     using Core.Invalidators;
-    using EventHandlers;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -40,7 +40,7 @@
         public InvalidatorByPage(InstanceByKeyCache<T, int> cache)
         {
             this.Cache = cache;
-            UmbracoCachingHandlers.RegisterContentByPageInvalidator(this);
+            UmbracoCachingComponent.RegisterContentByPageInvalidator(this);
         }
 
         #endregion

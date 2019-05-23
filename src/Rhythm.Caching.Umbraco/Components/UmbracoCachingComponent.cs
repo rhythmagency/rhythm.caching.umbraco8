@@ -1,19 +1,19 @@
-﻿namespace Rhythm.Caching.Umbraco.EventHandlers
+﻿namespace Rhythm.Caching.Umbraco.Components
 {
 
     // Namespaces.
     using Core.Invalidators;
-    using global::Umbraco.Core;
     using global::Umbraco.Core.Cache;
+    using global::Umbraco.Core.Composing;
     using global::Umbraco.Core.Events;
     using global::Umbraco.Core.Models;
-    using global::Umbraco.Core.Publishing;
     using global::Umbraco.Core.Services;
     using global::Umbraco.Core.Sync;
     using global::Umbraco.Web.Cache;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UmbracoContentService = global::Umbraco.Core.Services.Implement.ContentService;
 
     /// <summary>
     /// Handles application events used by caching.
@@ -24,10 +24,14 @@
     /// remain in memory. By using weak references that are periodically pruned, we can
     /// avoid that buildup of memory.
     /// </remarks>
-    public class UmbracoCachingHandlers : ApplicationEventHandler
+    internal sealed class UmbracoCachingComponent : IComponent
     {
 
         #region Private Properties
+        /// <summary>
+        /// An insta
+        /// </summary>
+        private IContentService ContentService { get; set; }
 
         /// <summary>
         /// Lock object to prevent cross-thread issues.
@@ -65,6 +69,28 @@
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Initializes the component.
+        /// </summary>
+        public void Initialize()
+        {
+            // Listen for content change events.
+            UmbracoContentService.Moving += ContentService_Moving;
+            UmbracoContentService.Moved += ContentService_Moved;
+            UmbracoContentService.Published += ContentService_Published;
+            UmbracoContentService.Unpublished += ContentService_UnPublished;
+            UmbracoContentService.Deleted += ContentService_Deleted;
+
+            ContentCacheRefresher.CacheUpdated += ContentCacheRefresher_CacheUpdated;
+        }
+
+        /// <summary>
+        /// Terminates the component.
+        /// </summary>
+        public void Terminate()
+        {
+        }
 
         /// <summary>
         /// Registers a cache by key invalidator so that it can be notified to invalidate any content
@@ -139,12 +165,9 @@
         #endregion
 
         #region Constructors
-
-        /// <summary>
-        /// Static constructor.
-        /// </summary>
-        static UmbracoCachingHandlers()
+        public UmbracoCachingComponent(IContentService contentService)
         {
+            ContentService = contentService;
             KeyByParentInvalidatorsLock = new object();
             KeyByParentInvalidators = new List<WeakReference<ICacheByKeyInvalidator>>();
             KeyByPageInvalidatorsLock = new object();
@@ -156,31 +179,10 @@
         #endregion
 
         #region Event Handlers
-
-        /// <summary>
-        /// Handles application startup.
-        /// </summary>
-        protected override void ApplicationStarting(UmbracoApplicationBase umbracoApplication,
-            ApplicationContext applicationContext)
-        {
-
-            // Listen for content change events.
-            ContentService.Moving += ContentService_Moving;
-            ContentService.Moved += ContentService_Moved;
-            ContentService.Published += ContentService_Published;
-            ContentService.UnPublished += ContentService_UnPublished;
-            ContentService.Deleted += ContentService_Deleted;
-            PageCacheRefresher.CacheUpdated += PageCacheRefresher_CacheUpdated;
-
-            // Boilerplate.
-            base.ApplicationStarting(umbracoApplication, applicationContext);
-
-        }
-
         /// <summary>
         /// Content cache was updated.
         /// </summary>
-        private void PageCacheRefresher_CacheUpdated(PageCacheRefresher sender,
+        private void ContentCacheRefresher_CacheUpdated(ContentCacheRefresher contentCacheRefresher,
             CacheRefresherEventArgs e)
         {
             var kind = e.MessageType;
@@ -189,8 +191,7 @@
                 var id = e.MessageObject as int?;
                 if (id.HasValue)
                 {
-                    var contentService = ApplicationContext.Current.Services.ContentService;
-                    var node = contentService.GetById(id.Value);
+                    var node = ContentService.GetById(id.Value);
                     if (node != null)
                     {
                         HandleChangedContent(new[] { node });
@@ -204,7 +205,7 @@
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContentService_UnPublished(IPublishingStrategy sender, PublishEventArgs<IContent> e)
+        private void ContentService_UnPublished(IContentService contentService, PublishEventArgs<IContent> e)
         {
             var nodes = e.PublishedEntities;
             HandleChangedContent(nodes);
@@ -223,8 +224,8 @@
         /// <summary>
         /// Content nodes were published.
         /// </summary>
-        private void ContentService_Published(IPublishingStrategy sender,
-            PublishEventArgs<IContent> e)
+        private void ContentService_Published(IContentService contentService,
+            ContentPublishedEventArgs e)
         {
             var nodes = e.PublishedEntities;
             HandleChangedContent(nodes);
@@ -263,9 +264,9 @@
 
             // Variables.
             var pageIds = ids.Select(x => x.Id).Cast<object>().ToList();
-            var foundByPageInvaldiators = GetKeyByPageInvalidators();
+            var foundByPageInvalidators = GetKeyByPageInvalidators();
             var aliases = ids.Select(x => x.ContentType.Alias).Distinct().ToList();
-            var foundByParentInvaldiators = GetKeyByParentInvalidators();
+            var foundByParentInvalidators = GetKeyByParentInvalidators();
             var parentIds = ids.Select(x => x.ParentId)
                 // Only include valid content ID's (i.e., to exclude the root content).
                 .Where(x => x >= 0)
@@ -273,14 +274,14 @@
             var foundInvalidatorsForAliases = GetPageInvalidatorsForAliases();
 
             // Call invalidators for the changed ID's.
-            foreach (var invalidator in foundByPageInvaldiators)
+            foreach (var invalidator in foundByPageInvalidators)
             {
 
                 // For any content node that changed, invalidate by the page ID.
                 invalidator.InvalidateForKeys(pageIds);
 
             }
-            foreach (var invalidator in foundByParentInvaldiators)
+            foreach (var invalidator in foundByParentInvalidators)
             {
 
                 // For any content node that changed, invalidate by the parent ID's.
@@ -309,18 +310,18 @@
         {
 
             // Variables.
-            var foundByParentInvaldiators = new List<ICacheByKeyInvalidator>();
+            var foundByParentInvalidators = new List<ICacheByKeyInvalidator>();
 
             // Find invalidators that are still in memory.
             lock (KeyByParentInvalidatorsLock)
             {
                 var invalidators = KeyByParentInvalidators;
-                foundByParentInvaldiators = GetLiveValues(ref invalidators);
+                foundByParentInvalidators = GetLiveValues(ref invalidators);
                 KeyByParentInvalidators = invalidators;
             }
 
             // Return the found "key by parent" invalidators.
-            return foundByParentInvaldiators;
+            return foundByParentInvalidators;
 
         }
 
@@ -420,7 +421,6 @@
         }
 
         #endregion
-
     }
 
 }

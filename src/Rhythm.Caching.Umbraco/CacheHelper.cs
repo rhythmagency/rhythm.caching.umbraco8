@@ -7,10 +7,27 @@
     /// <summary>
     /// Assists with caching operations.
     /// </summary>
-    public class CacheHelper
+    internal sealed class CacheHelper : ICacheHelper
     {
+        #region Private Properties
 
-        #region Properties
+        private IUmbracoContextFactory UmbracoContextFactory { get; set; }
+
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Primary constructor.
+        /// </summary>
+        /// <param name="umbracoContextFactory">Used for accessing the current UmbracoContext.</param>
+        public CacheHelper(IUmbracoContextFactory umbracoContextFactory)
+        {
+            UmbracoContextFactory = umbracoContextFactory;
+        }
+
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
         /// Returns the keys to be used when caching, depending on if the site is currently
@@ -20,31 +37,32 @@
         /// This allows for multiple caches to be used (one for live, one for preview mode,
         /// and one for the back office).
         /// </remarks>
-        public static string[] PreviewCacheKeys
+        public string[] PreviewCacheKeys
         {
             get
             {
-
-                // Variables.
-                var key = default(string);
-                var context = UmbracoContext.Current;
-                var hasContext = context != null;
-
-                // Is there an Umbraco context?
-                if (hasContext)
+                using (var ensuredUmbracoContext = UmbracoContextFactory.EnsureUmbracoContext())
                 {
-                    key = context.InPreviewMode
-                        ? "Preview"
-                        : "Live";
-                }
-                else
-                {
-                    key = "Back Office";
-                }
+                    // Variables.
+                    var context = ensuredUmbracoContext.UmbracoContext;
+                    var hasContext =  context != null;
 
-                // Return the key (wrapped in an array).
-                return new[] { key };
+                    // Is there an Umbraco context?
+                    var key = default(string);
+                    if (hasContext)
+                    {
+                        key = context.InPreviewMode
+                            ? "Preview"
+                            : "Live";
+                    }
+                    else
+                    {
+                        key = "Back Office";
+                    }
 
+                    // Return the key (wrapped in an array).
+                    return new[] { key };
+                }
             }
         }
 
