@@ -1,8 +1,9 @@
-﻿using Rhythm.Caching.Umbraco.Components;
-using Umbraco.Core.Composing;
-
-namespace Rhythm.Caching.Umbraco.Composers
+﻿namespace Rhythm.Caching.Umbraco.Composers
 {
+    // Namespaces.
+    using Components;
+    using global::Umbraco.Core.Composing;
+
     /// <summary>
     /// A Umbraco ComponentComposer used to register the UmbracoCachingComponent.
     /// </summary>

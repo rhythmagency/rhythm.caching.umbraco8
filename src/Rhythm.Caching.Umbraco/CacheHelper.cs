@@ -1,6 +1,5 @@
 ﻿namespace Rhythm.Caching.Umbraco
 {
-
     // Namespaces.
     using global::Umbraco.Web;
 

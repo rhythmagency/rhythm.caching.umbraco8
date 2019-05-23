@@ -1,9 +1,7 @@
-﻿using Rhythm.Caching.Umbraco.Components;
-
-namespace Rhythm.Caching.Umbraco.Invalidators
+﻿namespace Rhythm.Caching.Umbraco.Invalidators
 {
-
     // Namespaces.
+    using Components;
     using Core.Caches;
     using Core.Invalidators;
     using System.Collections.Generic;

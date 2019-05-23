@@ -1,8 +1,9 @@
-﻿using Umbraco.Core;
-using Umbraco.Core.Composing;
-
-namespace Rhythm.Caching.Umbraco.Composers
+﻿namespace Rhythm.Caching.Umbraco.Composers
 {
+    // Namespaces.
+    using global::Umbraco.Core;
+    using global::Umbraco.Core.Composing;
+
     /// <summary>
     /// An Umbraco IUserComposer for registering Helper classes to the Umbraco IoC container
     /// </summary>

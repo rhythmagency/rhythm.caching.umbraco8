@@ -1,20 +1,19 @@
-﻿using Rhythm.Caching.Core.Invalidators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Umbraco.Core.Cache;
-using Umbraco.Core.Composing;
-using Umbraco.Core.Events;
-using Umbraco.Core.Models;
-using Umbraco.Core.Services;
-using Umbraco.Core.Services.Implement;
-using Umbraco.Core.Sync;
-using Umbraco.Web.Cache;
-
-namespace Rhythm.Caching.Umbraco.Components
+﻿namespace Rhythm.Caching.Umbraco.Components
 {
-
     // Namespaces.
+    using Core.Invalidators;
+    using global::Umbraco.Core.Cache;
+    using global::Umbraco.Core.Composing;
+    using global::Umbraco.Core.Events;
+    using global::Umbraco.Core.Models;
+    using global::Umbraco.Core.Services;
+    using global::Umbraco.Core.Services.Implement;
+    using global::Umbraco.Core.Sync;
+    using global::Umbraco.Web.Cache;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Handles application events used by caching.
     /// </summary>
