@@ -13,9 +13,10 @@
     <copyright>Copyright 2016</copyright>
     <tags>caching, umbraco</tags>
     <dependencies>
-      <dependency id="Rhythm.Caching.Core" version="1.1.0" />
-      <dependency id="Rhythm.Core" version="1.1.1" />
-      <dependency id="UmbracoCms.Core" version="7.5.6" />
+      <dependency id="Rhythm.Caching.Core" version="1.1.1" />
+      <dependency id="Rhythm.Core" version="1.9.0" />
+      <dependency id="UmbracoCms.Core" version="8.0.2" />
+      <dependency id="UmbracoCms.Web" version="8.0.2" />
     </dependencies>
   </metadata>
 </package>
