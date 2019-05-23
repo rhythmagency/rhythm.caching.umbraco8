@@ -269,7 +269,9 @@
   <ItemGroup>
     <Compile Include="CacheHelper.cs" />
     <Compile Include="Components\UmbracoCachingComponent.cs" />
+    <Compile Include="Composers\HelpersComposer.cs" />
     <Compile Include="Composers\UmbracoCachingComponentComposer.cs" />
+    <Compile Include="ICacheHelper.cs" />
     <Compile Include="Invalidators\InvalidatorByPageAliases.cs" />
     <Compile Include="Invalidators\InvalidatorByPage.cs" />
     <Compile Include="Invalidators\InvalidatorByParentPage.cs" />
