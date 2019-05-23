@@ -1,31 +1,42 @@
 ﻿namespace Rhythm.Caching.Umbraco
 {
+
     // Namespaces.
     using global::Umbraco.Web;
 
     /// <inheritdoc />
     internal sealed class CacheHelper : ICacheHelper
     {
-        private readonly IUmbracoContextFactory _ctx;
+        #region Private Properties
 
-        public CacheHelper(IUmbracoContextFactory ctx)
+        private IUmbracoContextFactory UmbracoContextFactory { get; set; }
+
+        #endregion
+
+
+        #region Constructors
+
+        public CacheHelper(IUmbracoContextFactory umbracoContextFactory)
         {
-            _ctx = ctx;
+            UmbracoContextFactory = umbracoContextFactory;
         }
 
-        #region Properties
+        #endregion
+
+        #region Public Properties
+
         /// <inheritdoc />
         public string[] PreviewCacheKeys
         {
             get
             {
-                // Variables.
-                using (var ensuredUmbracoContext = _ctx.EnsureUmbracoContext())
+                using (var ensuredUmbracoContext = UmbracoContextFactory.EnsureUmbracoContext())
                 {
+                    // Variables.
                     var context = ensuredUmbracoContext.UmbracoContext;
                     var hasContext =  context != null;
 
-                    //// Is there an Umbraco context?
+                    // Is there an Umbraco context?
                     var key = default(string);
                     if (hasContext)
                     {
