@@ -239,9 +239,9 @@
 
             // Variables.
             var pageIds = ids.Select(x => x.Id).Cast<object>().ToList();
-            var foundByPageInvaldiators = GetKeyByPageInvalidators();
+            var foundByPageInvalidators = GetKeyByPageInvalidators();
             var aliases = ids.Select(x => x.ContentType.Alias).Distinct().ToList();
-            var foundByParentInvaldiators = GetKeyByParentInvalidators();
+            var foundByParentInvalidators = GetKeyByParentInvalidators();
             var parentIds = ids.Select(x => x.ParentId)
                 // Only include valid content ID's (i.e., to exclude the root content).
                 .Where(x => x >= 0)
@@ -249,14 +249,14 @@
             var foundInvalidatorsForAliases = GetPageInvalidatorsForAliases();
 
             // Call invalidators for the changed ID's.
-            foreach (var invalidator in foundByPageInvaldiators)
+            foreach (var invalidator in foundByPageInvalidators)
             {
 
                 // For any content node that changed, invalidate by the page ID.
                 invalidator.InvalidateForKeys(pageIds);
 
             }
-            foreach (var invalidator in foundByParentInvaldiators)
+            foreach (var invalidator in foundByParentInvalidators)
             {
 
                 // For any content node that changed, invalidate by the parent ID's.
@@ -285,18 +285,18 @@
         {
 
             // Variables.
-            var foundByParentInvaldiators = new List<ICacheByKeyInvalidator>();
+            var foundByParentInvalidators = new List<ICacheByKeyInvalidator>();
 
             // Find invalidators that are still in memory.
             lock (KeyByParentInvalidatorsLock)
             {
                 var invalidators = KeyByParentInvalidators;
-                foundByParentInvaldiators = GetLiveValues(ref invalidators);
+                foundByParentInvalidators = GetLiveValues(ref invalidators);
                 KeyByParentInvalidators = invalidators;
             }
 
             // Return the found "key by parent" invalidators.
-            return foundByParentInvaldiators;
+            return foundByParentInvalidators;
 
         }
 
