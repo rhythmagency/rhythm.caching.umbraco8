@@ -1,20 +1,20 @@
-﻿namespace Rhythm.Caching.Umbraco.EventHandlers
+﻿using Rhythm.Caching.Core.Invalidators;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Umbraco.Core.Cache;
+using Umbraco.Core.Composing;
+using Umbraco.Core.Events;
+using Umbraco.Core.Models;
+using Umbraco.Core.Services;
+using Umbraco.Core.Services.Implement;
+using Umbraco.Core.Sync;
+using Umbraco.Web.Cache;
+
+namespace Rhythm.Caching.Umbraco.Components
 {
 
     // Namespaces.
-    using Core.Invalidators;
-    using global::Umbraco.Core;
-    using global::Umbraco.Core.Cache;
-    using global::Umbraco.Core.Events;
-    using global::Umbraco.Core.Models;
-    using global::Umbraco.Core.Publishing;
-    using global::Umbraco.Core.Services;
-    using global::Umbraco.Core.Sync;
-    using global::Umbraco.Web.Cache;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
     /// <summary>
     /// Handles application events used by caching.
     /// </summary>
@@ -24,10 +24,11 @@
     /// remain in memory. By using weak references that are periodically pruned, we can
     /// avoid that buildup of memory.
     /// </remarks>
-    public class UmbracoCachingHandlers : ApplicationEventHandler
+    public class UmbracoCachingComponent : IComponent
     {
 
         #region Private Properties
+        private readonly IContentService _contentService;
 
         /// <summary>
         /// Lock object to prevent cross-thread issues.
@@ -139,12 +140,9 @@
         #endregion
 
         #region Constructors
-
-        /// <summary>
-        /// Static constructor.
-        /// </summary>
-        static UmbracoCachingHandlers()
+        public UmbracoCachingComponent(IContentService contentService)
         {
+            _contentService = contentService;
             KeyByParentInvalidatorsLock = new object();
             KeyByParentInvalidators = new List<WeakReference<ICacheByKeyInvalidator>>();
             KeyByPageInvalidatorsLock = new object();
@@ -155,32 +153,12 @@
 
         #endregion
 
+
         #region Event Handlers
-
-        /// <summary>
-        /// Handles application startup.
-        /// </summary>
-        protected override void ApplicationStarting(UmbracoApplicationBase umbracoApplication,
-            ApplicationContext applicationContext)
-        {
-
-            // Listen for content change events.
-            ContentService.Moving += ContentService_Moving;
-            ContentService.Moved += ContentService_Moved;
-            ContentService.Published += ContentService_Published;
-            ContentService.UnPublished += ContentService_UnPublished;
-            ContentService.Deleted += ContentService_Deleted;
-            PageCacheRefresher.CacheUpdated += PageCacheRefresher_CacheUpdated;
-
-            // Boilerplate.
-            base.ApplicationStarting(umbracoApplication, applicationContext);
-
-        }
-
         /// <summary>
         /// Content cache was updated.
         /// </summary>
-        private void PageCacheRefresher_CacheUpdated(PageCacheRefresher sender,
+        private void ContentCacheRefresher_CacheUpdated(ContentCacheRefresher contentCacheRefresher,
             CacheRefresherEventArgs e)
         {
             var kind = e.MessageType;
@@ -189,8 +167,7 @@
                 var id = e.MessageObject as int?;
                 if (id.HasValue)
                 {
-                    var contentService = ApplicationContext.Current.Services.ContentService;
-                    var node = contentService.GetById(id.Value);
+                    var node = _contentService.GetById(id.Value);
                     if (node != null)
                     {
                         HandleChangedContent(new[] { node });
@@ -204,7 +181,7 @@
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContentService_UnPublished(IPublishingStrategy sender, PublishEventArgs<IContent> e)
+        private void ContentService_UnPublished(IContentService contentService, PublishEventArgs<IContent> e)
         {
             var nodes = e.PublishedEntities;
             HandleChangedContent(nodes);
@@ -223,8 +200,8 @@
         /// <summary>
         /// Content nodes were published.
         /// </summary>
-        private void ContentService_Published(IPublishingStrategy sender,
-            PublishEventArgs<IContent> e)
+        private void ContentService_Published(IContentService contentService,
+            ContentPublishedEventArgs e)
         {
             var nodes = e.PublishedEntities;
             HandleChangedContent(nodes);
@@ -421,6 +398,21 @@
 
         #endregion
 
+        public void Initialize()
+        {
+            // Listen for content change events.
+            ContentService.Moving += ContentService_Moving;
+            ContentService.Moved += ContentService_Moved;
+            ContentService.Published += ContentService_Published;
+            ContentService.Unpublished += ContentService_UnPublished;
+            ContentService.Deleted += ContentService_Deleted;
+
+            ContentCacheRefresher.CacheUpdated += ContentCacheRefresher_CacheUpdated;
+        }
+
+        public void Terminate()
+        {
+        }
     }
 
 }

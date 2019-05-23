@@ -1,10 +1,10 @@
-﻿namespace Rhythm.Caching.Umbraco.Invalidators
-{
+﻿using Rhythm.Caching.Umbraco.Components;
 
+namespace Rhythm.Caching.Umbraco.Invalidators
+{
     // Namespaces.
     using Core.Caches;
     using Core.Invalidators;
-    using EventHandlers;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -40,7 +40,7 @@
         public InvalidatorByParentPage(InstanceByKeyCache<T, int> cache)
         {
             this.Cache = cache;
-            UmbracoCachingHandlers.RegisterContentByParentInvalidator(this);
+            UmbracoCachingComponent.RegisterContentByParentInvalidator(this);
         }
 
         #endregion

@@ -1,10 +1,11 @@
-﻿namespace Rhythm.Caching.Umbraco.Invalidators
+﻿using Rhythm.Caching.Umbraco.Components;
+
+namespace Rhythm.Caching.Umbraco.Invalidators
 {
 
     // Namespaces.
     using Core.Caches;
     using Core.Invalidators;
-    using EventHandlers;
     using Rhythm.Core;
     using System;
     using System.Collections.Generic;
@@ -48,7 +49,7 @@
         {
             Cache = cache;
             MonitoredAliases = aliases.MakeSafe().ToList();
-            UmbracoCachingHandlers.RegisterContentInvalidatorForAliases(this, aliases);
+            UmbracoCachingComponent.RegisterContentInvalidatorForAliases(this, aliases);
         }
 
         #endregion
